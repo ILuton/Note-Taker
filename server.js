@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const dataBase = require("./db/db.json");
+const pathone = require('./db/db.json');
 
 const PORT = process.env.PORT || 3001;
 
@@ -29,22 +29,53 @@ app.get("/api/notes", (req, res) => {
 })
 
 // post note
-app.post("/api/notes", (req,res) => {
+// 
+app.post('/api/notes', (req, res) => {
 
-  let uuid = Math.floor(Math.random()* 10000);
 
-  let noteToAdd = {
-    id: uuid,
-    title: req.body.title,
-    text: req.body.text
+  let uuid = Math.floor(Math.random() * 10000);
+
+  const {title, text } = req.body;
+
+  if (title && text) {
+
+    const newNote = {
+      id: uuid,
+      title: title,
+      text: text
+    };
+
+    fs.readFile("./db/db.json", "utf-8", (err, data) => {
+      if (err) {
+        console.error(err);
+      } else {
+        
+        const currentNotes = JSON.parse(data);
+
+        currentNotes.push(newNote);
+
+    fs.writeFile("./db/db.json", JSON.stringify(currentNotes), (err) => {
+      err
+        ? console.error(newNote)
+        : console.log(
+            `Note Added`
+          )
+        });
+      }
+      });
+
+    const response = {
+      status: 'success',
+      body: newNote,
+    };
+
+    console.log(response);
+    res.status(201).json(response);
+  } else {
+    res.status(500).json('Error in posting note');
   }
-
-  fs.writeFile(dataBase, JSON.stringify(noteToAdd), (err) => {
-    if (err) console.log(err);
-    console.log("note added")
-  }
-  )
 });
+
 
 
 app.listen(PORT, () => console.log(`App listening on port ${PORT}`));
