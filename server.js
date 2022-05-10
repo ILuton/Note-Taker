@@ -1,7 +1,8 @@
 const express = require('express');
+const { json } = require('express/lib/response');
 const fs = require('fs');
 const path = require('path');
-const pathone = require('./db/db.json');
+const pathOne = require('./db/db.json');
 
 const PORT = process.env.PORT || 3001;
 
@@ -78,6 +79,22 @@ app.post('/api/notes', (req, res) => {
 
 // delete note
 
+app.delete("/api/notes/:id", (req, res) => {
 
+  const noteId = req.params.id;
+  let sortedNotes = JSON.parse(fs.readFileSync("./db/db.json", "utf8"));
+   sortedNotes = sortedNotes.filter(returnNote => {
+    return returnNote.id != noteId;
+  })
+
+  fs.writeFileSync("./db/db.json", JSON.stringify(sortedNotes), (err) => {
+    if (err) throw err;
+    console.log("note delete complete")
+    res.send(sortedNotes);
+  });
+
+  // location.reload(); added to index.js to refresh page
+
+})
 
 app.listen(PORT, () => console.log(`App listening on port ${PORT}`));
